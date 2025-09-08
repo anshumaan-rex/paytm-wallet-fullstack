@@ -1,9 +1,10 @@
-import express from "express"
 import dotenv from "dotenv"
+dotenv.config({ quiet: true })
+
+import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-
-dotenv.config({ quiet: true })
+import connectDB from "./config/db.js"
 
 const app = express()
 const port = process.env.PORT || 4000
@@ -22,6 +23,9 @@ app.use((err,req,res,next) => {
     error: "Something went wrong!" 
   })
 })
-app.listen(port, ()=> {
-  console.log(`Server is up at: http://localhost:${port}`)
+
+connectDB().then(() => {
+  app.listen(port, ()=> {
+    console.log(`Server is up at: http://localhost:${port}`)
+  })
 })
