@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     minlength: [8, "Password must be at least 8 characters long"],
     maxlength: [64, "Password should be under 64 characters"],
     trim: true,
+    select: false
   },
   isVerified: {
     type: Boolean,
