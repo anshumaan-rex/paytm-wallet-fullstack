@@ -1,7 +1,12 @@
 import Token from "../models/token.js";
 import User from "../models/userModel.js";
-import { generateToken, hashPassword } from "../utils/authUtills.js";
+import {
+  comparePassword,
+  generateToken,
+  hashPassword,
+} from "../utils/authUtills.js";
 import transporter from "../utils/mailer.js";
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
   const { name, username, email, password } = req.userInputData;
@@ -93,7 +98,6 @@ export const verify = async (req, res) => {
       success: true,
       message: "verification successfull",
     });
-
   } catch (err) {
     console.error("Error in email verification", err);
     return res.status(500).json({
@@ -102,3 +106,49 @@ export const verify = async (req, res) => {
     });
   }
 };
+
+export const signin = async (req, res) => {
+  const { email, password } = req.userInputData;
+
+  try {
+    const user = await User.findOne({ email }).select("+password -otp -otpExpiresAt");
+    const isMatched = await comparePassword(password, user?.password);
+
+    if (!user || !isMatched) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(401).json({
+        success: false,
+        message: "Please verify your email before signing in",
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "20d" });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 20 * 24 * 60 * 60 * 1000,
+    });
+
+    user.password = undefined
+    return res.status(200).json({
+      success: true,
+      message: "signin successful",
+      user,
+    });
+  } catch (err) {
+    console.error("Error in signing in", err);
+    return res.status(500).json({
+      success: false,
+      error: "Server error. Please try again!",
+    });
+  }
+};
+
