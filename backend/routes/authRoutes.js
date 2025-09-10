@@ -1,11 +1,12 @@
 import express from "express"
 import inputValidation from "../middlewares/schemaValidate.js"
-import { userSignupInputValidation } from "../validations/userValidation.js"
-import { signup, verify } from "../controllers/authController.js"
+import { userSigninInputValidation, userSignupInputValidation } from "../validations/userValidation.js"
+import { signin, signup, verify } from "../controllers/authController.js"
 
 const authRouter = express.Router()
 
 authRouter.post("/signup", inputValidation(userSignupInputValidation), signup)
 authRouter.post("/verify", verify)
+authRouter.post("/signin", inputValidation(userSigninInputValidation), signin)
 
 export default authRouter
