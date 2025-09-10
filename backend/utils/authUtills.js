@@ -7,6 +7,11 @@ export async function hashPassword(password) {
   return hashedPassword;
 }
 
+export async function comparePassword(password, hashedPassword) {
+    const isMatched = await bcrypt.compare(password, hashedPassword)
+    return isMatched
+}
+
 export async function generateToken(userId) {
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
