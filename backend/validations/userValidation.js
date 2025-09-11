@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { date, z } from "zod"
 
 export const userSignupInputValidation = z.object({
   name: z.string().min(3, { error: "name should have at least 3 letters" }).max(40, { error: "name should be under 40 letters" }),
@@ -10,4 +10,12 @@ export const userSignupInputValidation = z.object({
 export const userSigninInputValidation = z.object({
   email: z.email(),
   password: z.string().trim().min(1, { error: "Password is required" })
+})
+
+export const userResetPasswordSchema = z.object({
+  newPassword: z.string().min(8, { error: "Password must be at laeast 8 character long" }).max(64, { error: "Password must be under 64 character" }),
+  confirmPassword: z.string()
+}).refine((data) => data.newPassword === data.confirmPassword , {
+  error: "Password do not match",
+  path: ["confirmPassword"]
 })
