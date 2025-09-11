@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser"
 import connectDB from "./config/db.js"
 
 import authRouter from "./routes/authRoutes.js"
+import userRouter from "./routes/userRoutes.js"
 
 const app = express()
 const port = process.env.PORT || 4000
@@ -16,6 +17,7 @@ app.use(cors())
 app.use(cookieParser())
 
 app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/users", userRouter)
 
 app.get("/", (req,res) => {
   res.status(200).send("ok")
