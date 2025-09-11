@@ -5,6 +5,7 @@ import {
   generateOtp,
   generateToken,
   hashPassword,
+  verifyHashedOtp,
 } from "../utils/authUtills.js";
 import transporter from "../utils/mailer.js";
 import jwt from "jsonwebtoken";
@@ -217,3 +218,106 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+export const verifyOtp = async (req, res) => {
+  const { otp, email } = req.body;
+
+  if (!otp) {
+    return res.status(400).json({
+      success: false,
+      message: "OTP is required",
+    });
+  }
+
+  if (!email) {
+    return res.status(401).json({
+      success: false,
+      message: "session manupulated. Please try after sometime!",
+    });
+  }
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!user.otp || !user.otpExpiresAt) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP request found for this user",
+      });
+    }
+
+    if (user.otpExpiresAt < Date.now()) {
+      return res.status(401).json({
+        success: false,
+        message: "OTP has expired, please request again",
+      });
+    }
+
+    const hashedOtp = verifyHashedOtp(otp);
+
+    if (hashedOtp !== user.otp) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    user.otp = null;
+    user.otpExpiresAt = null;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully. You can now reset your password",
+    });
+  } catch (err) {
+    console.error("Error in verifying OTP", err);
+    return res.status(500).json({
+      success: false,
+      error: "Server error. Please try again!",
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { email, newPassword, confirmPassword } = req.body;
+  try {
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+    if (!email) {
+      return res.status(401).json({
+        success: false,
+        message: "session manupulated. Please try after sometime!",
+      });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const hashedPassword = await hashPassword(newPassword);
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
