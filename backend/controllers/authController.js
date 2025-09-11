@@ -321,3 +321,12 @@ export const resetPassword = async (req, res) => {
     });
   }
 };
+
+export const profile = (req,res) => {
+  const user = req.user;
+  const { otp, otpExpiresAt, createdAt, updatedAt, ...userDetails } = user.toObject()
+  return res.status(200).json({
+    success: true,
+    user: userDetails
+  })
+}
