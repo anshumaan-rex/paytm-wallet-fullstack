@@ -31,7 +31,7 @@ export function generateOtp () {
   return { hashedOtp, otp, otpExpiresAt }
 }
 
-export function verifyHashedOtp ({ otp }) {
+export function verifyHashedOtp (otp) {
   const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex")
   return hashedOtp
 }
