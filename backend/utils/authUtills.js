@@ -30,3 +30,8 @@ export function generateOtp () {
   const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000)
   return { hashedOtp, otp, otpExpiresAt }
 }
+
+export function verifyHashedOtp ({ otp }) {
+  const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex")
+  return hashedOtp
+}
