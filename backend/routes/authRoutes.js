@@ -1,7 +1,8 @@
 import express from "express"
 import inputValidation from "../middlewares/schemaValidate.js"
 import { userResetPasswordSchema, userSigninInputValidation, userSignupInputValidation } from "../validations/userValidation.js"
-import { forgotPassword, resetPassword, signin, signup, verify, verifyOtp } from "../controllers/authController.js"
+import { forgotPassword, profile, resetPassword, signin, signup, verify, verifyOtp } from "../controllers/authController.js"
+import { isAuthenticated } from "../middlewares/auth.js"
 
 const authRouter = express.Router()
 
@@ -11,5 +12,6 @@ authRouter.post("/signin", inputValidation(userSigninInputValidation), signin)
 authRouter.post("/forgot-password", forgotPassword)
 authRouter.post("/verify-otp", verifyOtp)
 authRouter.patch("/reset-password", inputValidation(userResetPasswordSchema), resetPassword)
+authRouter.get("/me", isAuthenticated, profile)
 
 export default authRouter
