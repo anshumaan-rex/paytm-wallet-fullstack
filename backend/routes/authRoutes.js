@@ -12,6 +12,6 @@ authRouter.post("/signin", inputValidation(userSigninInputValidation), signin)
 authRouter.post("/forgot-password", forgotPassword)
 authRouter.post("/verify-otp", verifyOtp)
 authRouter.patch("/reset-password", inputValidation(userResetPasswordSchema), resetPassword)
-authRouter.get("/me", isAuthenticated, profile)
+authRouter.get("/profile", isAuthenticated, profile)
 
 export default authRouter
