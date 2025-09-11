@@ -2,6 +2,7 @@ import Token from "../models/token.js";
 import User from "../models/userModel.js";
 import {
   comparePassword,
+  generateOtp,
   generateToken,
   hashPassword,
 } from "../utils/authUtills.js";
@@ -111,7 +112,9 @@ export const signin = async (req, res) => {
   const { email, password } = req.userInputData;
 
   try {
-    const user = await User.findOne({ email }).select("+password -otp -otpExpiresAt");
+    const user = await User.findOne({ email }).select(
+      "+password -otp -otpExpiresAt"
+    );
     const isMatched = await comparePassword(password, user?.password);
 
     if (!user || !isMatched) {
@@ -128,7 +131,9 @@ export const signin = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "20d" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "20d",
+    });
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -137,7 +142,7 @@ export const signin = async (req, res) => {
       maxAge: 20 * 24 * 60 * 60 * 1000,
     });
 
-    user.password = undefined
+    user.password = undefined;
     return res.status(200).json({
       success: true,
       message: "signin successful",
@@ -145,6 +150,66 @@ export const signin = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in signing in", err);
+    return res.status(500).json({
+      success: false,
+      error: "Server error. Please try again!",
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Email id is required",
+    });
+  }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "No user found with this email",
+      });
+    }
+    if (!user.isVerified) {
+      return res.status(401).json({
+        success: false,
+        message: "Verify your email to change your password",
+      });
+    }
+
+    const { otp, hashedOtp, otpExpiresAt } = generateOtp();
+
+    user.otp = hashedOtp;
+    user.otpExpiresAt = otpExpiresAt;
+    await user.save();
+
+    try {
+      await transporter.sendMail({
+        from: `"Paytm" <${process.env.SMTP_FROM}>`,
+        to: email,
+        subject: "OTP for your Password reset",
+        html: `<p>This is the OTP for your Paytm account for resetting your password <b>${otp}</b> Valid for 5 minutes</p>`,
+      });
+    } catch (emailErr) {
+      console.error("Error in sending password reset OTP", emailErr);
+      (user.otp = null), (user.otpExpiresAt = null);
+      await user.save();
+
+      return res.status(500).json({
+        success: false,
+        error: "Failed to send password reset otp email. Please try again!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP has been been sent on your email",
+    });
+  } catch (err) {
+    console.error("Error in forgot password", err);
     return res.status(500).json({
       success: false,
       error: "Server error. Please try again!",
