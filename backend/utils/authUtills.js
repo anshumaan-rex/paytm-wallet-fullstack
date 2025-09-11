@@ -27,5 +27,6 @@ export async function generateToken(userId) {
 export function generateOtp () {
   const otp = crypto.randomInt(100000, 999999).toString()
   const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex")
-  return hashedOtp
+  const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000)
+  return { hashedOtp, otp, otpExpiresAt }
 }
