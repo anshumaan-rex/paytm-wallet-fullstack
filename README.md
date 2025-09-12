@@ -46,3 +46,27 @@ A full-stack wallet application where users can register, login, deposit money, 
 ```bash
 git clone https://github.com/anshumaan-rex/paytm-wallet-fullstack.git
 cd paytm-wallet-fullstack
+
+2. Install dependencies:
+
+npm install
+
+3. Create a .env file in the root:
+
+PORT=4000
+MONGODB_URI=<your_mongodb_connection_string>
+FRONTEND_URL=http://localhost:5137
+JWT_SECRET=<your_jwt_secret>
+NODE_ENV=development
+
+SMTP_HOST=<your_smtp_host>
+SMTP_PORT=<your_smtp_port>
+SMTP_SECURE=<true_or_false>
+SMTP_USER=<your_smtp_user>
+SMTP_PASS=<your_smtp_password>
+SMTP_FROM=<your_email_from>
+
+
+4. Start the server:
+
+npm run dev
