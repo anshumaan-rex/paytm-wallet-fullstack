@@ -87,53 +87,82 @@ export const getParticularUser = async (req, res) => {
 export const sendMoney = async (req, res) => {
   const user = req.user;
   const receiverId = req.params.id;
-  const amount = Number(req.body.amount)
+  let amount = Number(req.body.amount);
 
   if (!receiverId) {
     return res.status(400).json({
       success: false,
-      message: "could not find the user without id. Failed to send money",
-    });
-  }
-  if (!mongoose.isValidObjectId(receiverId)) {
-    return res.status(400).json({
-      success: false,
-      message: "invalid user id. Transaction failed!",
+      message: "Could not find the user without id. Failed to send money",
     });
   }
 
-  if (!amount || amount < 1 || isNaN(amount)) {
+  if (!mongoose.isValidObjectId(receiverId)) {
     return res.status(400).json({
       success: false,
-      message: "Please enter the valid amount",
+      message: "Invalid user id. Transaction failed!",
     });
   }
+
+  if (!amount || amount < 1 || isNaN(amount) || !Number.isFinite(amount)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please enter a valid amount",
+    });
+  }
+
+  amount = Number(amount.toFixed(2));
+
+  if (amount > 1000000) {
+    return res.status(400).json({
+      success: false,
+      message: "Amount exceeds the maximum limit",
+    });
+  }
+
+  if (user._id.toString() === receiverId) {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot send money to yourself",
+    });
+  }
+
   const receiver = await User.findById(receiverId);
   if (!receiver) {
     return res.status(404).json({
       success: false,
-      message: "receiver user not found. Transaction failed",
+      message: "Receiver user not found. Transaction failed",
     });
   }
 
   if (user.balance < amount) {
     return res.status(400).json({
       success: false,
-      message: "insufficient balance",
+      message: "Insufficient balance",
+    });
+  }
+
+  const MAX_BALANCE = 100000000;
+  if (receiver.balance + amount > MAX_BALANCE) {
+    return res.status(400).json({
+      success: false,
+      message: "Receiver balance limit exceeded",
     });
   }
 
   const session = await mongoose.startSession();
   session.startTransaction();
+
   try {
-    user.balance -= amount;
-    receiver.balance += amount;
+    const amountInPaise = Math.round(amount * 100);
+
+    user.balance -= amountInPaise;
+    receiver.balance += amountInPaise;
 
     await user.save({ session });
     await receiver.save({ session });
 
     await Transaction.create(
-      [{ sender: user._id, receiver: receiverId, amount }],
+      [{ sender: user._id, receiver: receiverId, amount: amountInPaise }],
       { session }
     );
 
@@ -148,10 +177,11 @@ export const sendMoney = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
 
-    console.error("Error in transaction", err);
-    return res.status(500).status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Serever error. Transaction failed",
+      message: "Server error. Transaction failed",
     });
   }
 };
+
+
