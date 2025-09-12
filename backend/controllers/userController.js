@@ -184,4 +184,53 @@ export const sendMoney = async (req, res) => {
   }
 };
 
+export const moneyDeposite = async (req, res) => {
+  const user = req.user;
+
+  try {
+    let amount = Number(req.body.amount);
+
+    const MAX_DEPOSITE = 1000000;
+    const MAXIMUM_BALANCE = 999999999999999;
+
+    if (!amount || amount < 1 || isNaN(amount) || !Number.isFinite(amount)) {
+      return res.status(400).json({
+        success: false,
+        message: "Enter the valid amount",
+      });
+    }
+
+    amount = Number(amount.toFixed(2));
+
+    if (amount > MAX_DEPOSITE) {
+      return res.status(400).json({
+        success: false,
+        message: "Maximum deposite amount reached",
+        MAX_DEPOSITE,
+      });
+    }
+
+    if (user.balance + amount > MAXIMUM_BALANCE) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot deposit. Balance cannot exceed ${MAXIMUM_BALANCE}`,
+      });
+    }
+
+    const amountInPaise = Math.round(amount * 100);
+
+    user.balance += amountInPaise;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Deposite successful",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error. Deposite failed!",
+    });
+  }
+};
 
