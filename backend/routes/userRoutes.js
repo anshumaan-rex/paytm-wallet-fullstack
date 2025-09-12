@@ -6,7 +6,7 @@ const userRouter = Router()
 
 userRouter.get("/all", isAuthenticated, getAllUser)
 userRouter.get("/:id", isAuthenticated, getParticularUser)
-userRouter.post("/:id", isAuthenticated, sendMoney)
+userRouter.post("/send/:id", isAuthenticated, sendMoney)
 userRouter.post("/deposite/wallet", isAuthenticated, moneyDeposite)
 
 export default userRouter
