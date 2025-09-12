@@ -55,7 +55,7 @@ export const signup = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "signed up successfully",
+      message: "Verification email has been sent to your email ID",
     });
   } catch (err) {
     console.error("Error in signup", err);
