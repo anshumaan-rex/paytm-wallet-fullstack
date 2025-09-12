@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     trim: true,
     select: false
   },
+  balance: {
+    type: Number,
+    default: 1000
+  },
   isVerified: {
     type: Boolean,
     default: false,
