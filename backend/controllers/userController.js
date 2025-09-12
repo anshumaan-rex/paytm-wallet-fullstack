@@ -17,7 +17,7 @@ export const getAllUser = async (req, res) => {
       };
     }
 
-    const users = await User.find(query);
+    const users = await User.find(query).select("-otp -otpExpiresAt -email -balance -createdAt -updatedAt")
     const filteredUsers = users.filter(
       (usr) => usr._id.toString() !== user._id.toString()
     );
