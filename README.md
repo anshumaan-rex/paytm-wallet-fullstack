@@ -4,13 +4,13 @@ A full-stack wallet application where users can register, login, deposit money, 
 
 ## Features
 
-- User Signup and Login with JWT authentication.
+- User Signup, Signin, and Profile management.
+- OTP verification and password reset functionality.
 - Protected routes for authenticated users.
 - Deposit money into your wallet.
 - Send money to other users with transaction history.
-- User search functionality.
+- Search users functionality.
 - Validation for balance limits and transaction amounts.
-- Transactions stored in MongoDB with sender and receiver references.
 
 ## Tech Stack
 
@@ -22,24 +22,24 @@ A full-stack wallet application where users can register, login, deposit money, 
 
 ## API Endpoints
 
-### Auth
+### Auth Routes
 
-- `POST /api/auth/signup` - Register new user
-- `POST /api/auth/login` - Login user
-- `POST /api/auth/logout` - Logout user
+- `POST /api/v1/auth/signup` - Register new user
+- `POST /api/v1/auth/verify` - Verify user (OTP)
+- `POST /api/v1/auth/signin` - Login user
+- `POST /api/v1/auth/forgot-password` - Initiate password reset
+- `POST /api/v1/auth/verify-otp` - Verify OTP for reset
+- `PATCH /api/v1/auth/reset-password` - Reset password
+- `GET /api/v1/auth/profile` - Get logged-in user profile
 
-### User
+### User Routes
 
-- `GET /api/users` - Get all users (searchable by name or username)
-- `GET /api/users/:id` - Get a particular user (for sending money)
-- `POST /api/users/deposit` - Deposit money into your wallet
-- `POST /api/users/send/:id` - Send money to a particular user
+- `GET /api/v1/users/all` - Get all users (searchable)
+- `GET /api/v1/users/:id` - Get a particular user (for sending money)
+- `POST /api/v1/users/send/:id` - Send money to a user
+- `POST /api/v1/users/deposite/wallet` - Deposit money into your wallet
 
-### Transaction
-
-- `GET /api/transactions` - Get all transactions for logged-in user
-
-## Usage
+## Setup & Usage
 
 1. Clone the repository:
 
