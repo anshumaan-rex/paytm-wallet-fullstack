@@ -115,7 +115,7 @@ const Signin = () => {
                 <span className="ml-2 text-sm text-cyan-200/80">Remember me</span>
               </label>
               
-              <a href="#" className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300">
+              <a href="/forgot-password" className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300">
                 Forgot password?
               </a>
             </div>
