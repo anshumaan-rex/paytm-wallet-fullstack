@@ -26,7 +26,7 @@ function App() {
         }
       />
       <Route
-        path="/sendmoney"
+        path="/sendmoney/:id"
         element={
           <ProtectedRoute>
             <SendMoney />
