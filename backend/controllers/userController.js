@@ -153,16 +153,15 @@ export const sendMoney = async (req, res) => {
   session.startTransaction();
 
   try {
-    const amountInPaise = Math.round(amount * 100);
 
-    user.balance -= amountInPaise;
-    receiver.balance += amountInPaise;
+    user.balance -= amount;
+    receiver.balance += amount;
 
     await user.save({ session });
     await receiver.save({ session });
 
     await Transaction.create(
-      [{ sender: user._id, receiver: receiverId, amount: amountInPaise }],
+      [{ sender: user._id, receiver: receiverId, amount: amount }],
       { session }
     );
 
@@ -177,6 +176,7 @@ export const sendMoney = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
 
+    console.error("Transaction error:", err);
     return res.status(500).json({
       success: false,
       message: "Server error. Transaction failed",
