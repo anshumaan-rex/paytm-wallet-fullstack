@@ -8,6 +8,7 @@ import SendMoney from "./pages/SendMoney";
 import Verify from "./pages/Verify";
 import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Transactions from "./pages/Transactions";
 
 function App() {
   return (
@@ -30,6 +31,14 @@ function App() {
         element={
           <ProtectedRoute>
             <SendMoney />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/transactions/:id"
+        element={
+          <ProtectedRoute>
+            <Transactions />
           </ProtectedRoute>
         }
       />
