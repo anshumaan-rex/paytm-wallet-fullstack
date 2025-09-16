@@ -336,4 +336,24 @@ export const profile = (req,res) => {
     success: true,
     user: userDetails
   })
-}
+};
+
+export const logout = (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax"
+    });
+    
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: "Server Error. Try again!"
+    });
+  }
+};
