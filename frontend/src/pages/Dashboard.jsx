@@ -1,77 +1,83 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import UserProfile from "../components/UserProfile"
-import Users from "../components/Users"
-import DepositeMoney from "../components/DepositeMoney"
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import UserProfile from "../components/UserProfile";
+import Users from "../components/Users";
+import DepositeMoney from "../components/DepositeMoney";
 
 function Dashboard() {
-  const [user, setUser] = useState({})
-  const [showProfile, setShowProfile] = useState(false)
-  const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [message, setMessage] = useState("")
-  const [fetchedUsers, setFetchedUsers] = useState([])
-  const [depositeAmount, setDepositeAmount] = useState(0)
-  const [showDepositModal, setShowDepositModal] = useState(false)
-  const [depositLoading, setDepositLoading] = useState(false)
-  const [depositMessage, setDepositMessage] = useState("")
-  const [depositError, setDepositError] = useState("")
+  const [user, setUser] = useState({});
+  const [showProfile, setShowProfile] = useState(false);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [fetchedUsers, setFetchedUsers] = useState([]);
+  const [depositeAmount, setDepositeAmount] = useState(0);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [depositMessage, setDepositMessage] = useState("");
+  const [depositError, setDepositError] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/v1/auth/profile", {
-          withCredentials: true
-        })
+        const res = await axios.get(
+          "http://localhost:4000/api/v1/auth/profile",
+          {
+            withCredentials: true,
+          }
+        );
         if (res.data.success) {
-          setUser(res.data.user)
+          setUser(res.data.user);
         } else {
-          navigate("/signin")
+          navigate("/signin");
         }
       } catch {
-        navigate("/signin")
+        navigate("/signin");
       }
-    }
-    fetchLoggedInUser()
-  }, [])
+    };
+    fetchLoggedInUser();
+  }, []);
 
   useEffect(() => {
-    setLoading(true)
-    setError("")
-    setMessage("")
+    setLoading(true);
+    setError("");
+    setMessage("");
 
     const getUsers = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/v1/users/all?search=${search}`, {
-          withCredentials: true
-        })
+        const res = await axios.get(
+          `http://localhost:4000/api/v1/users/all?search=${search}`,
+          {
+            withCredentials: true,
+          }
+        );
         if (res.data.success) {
-          setFetchedUsers(res.data.users || [])
+          setFetchedUsers(res.data.users || []);
         } else {
-          setError(res.data.message)
+          setError(res.data.message);
         }
       } catch (err) {
         if (err.response) {
-          const data = err.response.data
-          setError(data.error || data.message || "Failed to get users")
+          const data = err.response.data;
+          setError(data.error || data.message || "Failed to get users");
         } else {
-          setError("Network Error. Try again!")
+          setError("Network Error. Try again!");
         }
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    getUsers()
-  }, [search])
+    };
+    getUsers();
+  }, [search]);
 
   async function initiateDeposite() {
-    setDepositLoading(true)
-    setDepositMessage("")
-    setDepositError("")
+    setDepositLoading(true);
+    setDepositMessage("");
+    setDepositError("");
 
     try {
       const res = await axios.post(
@@ -79,31 +85,31 @@ function Dashboard() {
         { amount: depositeAmount },
         {
           headers: { "Content-Type": "application/json" },
-          withCredentials: true
+          withCredentials: true,
         }
-      )
+      );
       if (res.data.success) {
-        setDepositMessage(res.data.message)
-        setUser(prev => ({
+        setDepositMessage(res.data.message);
+        setUser((prev) => ({
           ...prev,
-          balance: prev.balance + parseFloat(depositeAmount)
-        }))
+          balance: prev.balance + parseFloat(depositeAmount),
+        }));
         setTimeout(() => {
-          setDepositeAmount(0)
-          setShowDepositModal(false)
-        }, 2000)
+          setDepositeAmount(0);
+          setShowDepositModal(false);
+        }, 2000);
       } else {
-        setDepositError(res.data.message)
+        setDepositError(res.data.message);
       }
     } catch (err) {
       if (err.response) {
-        const data = err.response.data
-        setDepositError(data.error || data.message || "Failed to deposit")
+        const data = err.response.data;
+        setDepositError(data.error || data.message || "Failed to deposit");
       } else {
-        setDepositError("Network error. Try again!")
+        setDepositError("Network error. Try again!");
       }
     } finally {
-      setDepositLoading(false)
+      setDepositLoading(false);
     }
   }
 
@@ -113,7 +119,9 @@ function Dashboard() {
         <div className="text-center sm:text-left">
           <p className="text-cyan-200/80 text-sm sm:text-base">Hello,</p>
           <p className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
-            {user.name ? user.name.charAt(0).toUpperCase() + user.name?.slice(1) : ""}
+            {user.name
+              ? user.name.charAt(0).toUpperCase() + user.name?.slice(1)
+              : ""}
           </p>
         </div>
         <div className="text-center">
@@ -156,10 +164,10 @@ function Dashboard() {
           message={depositMessage}
           error={depositError}
           onClose={() => {
-            setShowDepositModal(false)
-            setDepositeAmount(0)
-            setDepositMessage("")
-            setDepositError("")
+            setShowDepositModal(false);
+            setDepositeAmount(0);
+            setDepositMessage("");
+            setDepositError("");
           }}
         />
       )}
@@ -173,7 +181,9 @@ function Dashboard() {
             className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700/60 border border-cyan-500/30 rounded-lg text-cyan-50 placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
           />
         </div>
-        <h4 className="text-lg sm:text-xl font-semibold text-cyan-300 mb-3 sm:mb-4">Users</h4>
+        <h4 className="text-lg sm:text-xl font-semibold text-cyan-300 mb-3 sm:mb-4">
+          Users
+        </h4>
         {message && (
           <div className="p-2 sm:p-3 bg-blue-500/20 border border-blue-500/50 rounded-lg mb-3 sm:mb-4">
             <p className="text-blue-300 text-xs sm:text-sm">{message}</p>
@@ -193,7 +203,7 @@ function Dashboard() {
         )}
       </section>
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;
