@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import Transaction from "../models/transaction.js";
-import { promise } from "zod";
 
 export const getAllUser = async (req, res) => {
   const user = req.user;
@@ -28,8 +27,8 @@ export const getAllUser = async (req, res) => {
     );
 
     if (filteredUsers.length === 0) {
-      return res.status(204).json({
-        success: true,
+      return res.status(200).json({
+        success: false,
         message: search ? "No user matched" : "Currently there are no users",
         users: [],
       });
@@ -153,7 +152,6 @@ export const sendMoney = async (req, res) => {
   session.startTransaction();
 
   try {
-
     user.balance -= amount;
     receiver.balance += amount;
 
@@ -217,9 +215,7 @@ export const moneyDeposite = async (req, res) => {
       });
     }
 
-    const amountInPaise = Math.round(amount * 100);
-
-    user.balance += amountInPaise;
+    user.balance += amount;
     await user.save();
 
     return res.status(200).json({
@@ -234,3 +230,43 @@ export const moneyDeposite = async (req, res) => {
   }
 };
 
+export const getTransactions = async (req, res) => {
+  const { _id } = req.user;
+  const receiverId = req.params.id;
+
+  if (!receiverId || !_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing details. Try again",
+    });
+  }
+
+  if (!mongoose.isValidObjectId(receiverId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid user Id",
+    });
+  }
+  try {
+    const Transaction_History = await Transaction.find({
+      sender: _id,
+      receiver: receiverId,
+    });
+    if (Transaction_History.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "No transactions found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      transactions: Transaction_History,
+    });
+  } catch (err) {
+    console.error("Error in transaction history", err);
+    return res.status(500).json({
+      success: false,
+      error: "Server Error. Try again!",
+    });
+  }
+};
